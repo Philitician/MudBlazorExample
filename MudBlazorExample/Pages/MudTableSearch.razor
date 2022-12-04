@@ -1,0 +1,63 @@
+﻿@page "/mudtablesearch"
+@using MudBlazor;
+@using MudBlazorExample.Models
+@using MudBlazorExample.Services
+@inject IAppService AppService;
+
+<PageTitle>App Roller</PageTitle>
+
+@if (_apps == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <MudTable Items="@_apps" Hover="true" Filter="new Func<AppVM,bool>(FilterTrigger)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Applikasjoner</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString" Immediate="true" DebounceInterval="100" Placeholder="Søk" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>DisplayName</MudTh>
+            <MudTh>ClientId</MudTh>
+            <MudTh>Description</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Name">@context.DisplayName</MudTd>
+            <MudTd DataLabel="ClientId">@context.ClientId</MudTd>
+            <MudTd DataLabel="Description">@context.Description</MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    private List<AppVM> _apps;
+    private string searchString = "";
+    private AppVM _selectedApp;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _apps = await AppService.GetAppsAsync();
+    }
+
+    private bool FilterTrigger(AppVM app) => FilterApps(app, searchString);
+    
+    private bool FilterApps(AppVM app, string searchString)
+    {
+        Console.WriteLine($"FilterApps: {app.DisplayName}");
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (app.DisplayName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (app.ClientId.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (app.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+}

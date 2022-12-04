@@ -1,0 +1,83 @@
+﻿@page "/"
+@using MudBlazor
+@using MudBlazorExample.Models
+@using MudBlazorExample.Services
+@inject IAppRoleService AppRoleService;
+
+<PageTitle>Index</PageTitle>
+
+<style>
+    .mud-table-cell-custom-group {
+        font-weight: 500;
+    }
+
+    .mud-table-cell-custom-group-footer {
+        padding-bottom: 50px;
+        text-align: right;
+    }
+</style>
+
+<MudTable Hover="true" Breakpoint="Breakpoint.Sm" FixedHeader="true"
+          Items="@_appRoles"
+          GroupBy="@_groupDefinition"
+          GroupHeaderStyle="background-color:var(--mud-palette-background-grey)"
+          GroupFooterClass="mb-4"
+          Dense="true"
+          Filter="new Func<AppRoleVM, bool>(FilterTrigger)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Rolleoversikt</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Immediate="true" DebounceInterval="100" Placeholder="Søk" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"></MudTextField>
+    </ToolBarContent>
+    <ColGroup>
+        <col style="width: 60px;"/>
+        <col/>
+        <col/>
+        <col/>
+    </ColGroup>
+    <HeaderContent>
+        <MudTh>Navn</MudTh>
+        <MudTh>Beskrivelse</MudTh>
+        <MudTh>Verdi</MudTh>
+    </HeaderContent>
+    <GroupHeaderTemplate>
+        <MudTh Class="mud-table-cell-custom-group" colspan="4">@($"{context.GroupName}: {context.Key}")</MudTh>
+    </GroupHeaderTemplate>
+    <RowTemplate>
+        <MudTd DataLabel="DisplayName">@context.DisplayName</MudTd>
+        <MudTd DataLabel="Description">@context.Description</MudTd>
+        <MudTd DataLabel="Value">@context.Value</MudTd>
+    </RowTemplate>
+</MudTable>
+@code {
+    private IEnumerable<AppRoleVM> _appRoles;
+    private TableGroupDefinition<AppRoleVM> _groupDefinition = new()
+    {
+        GroupName = "Applikasjon",
+        Indentation = false,
+        Expandable = true,
+        IsInitiallyExpanded = false,
+        Selector = (e) => e.App.DisplayName
+    };
+    private string searchString = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _appRoles = await AppRoleService.GetRolesAsync();
+    }
+    
+    private bool FilterTrigger(AppRoleVM app) => FilterApps(app, searchString);
+    
+    private bool FilterApps(AppRoleVM app, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (app.DisplayName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
+            return true;
+        if (app.Description?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
+            return true;
+        if (app.Value?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
+            return true;
+        return false;
+    }
+}
