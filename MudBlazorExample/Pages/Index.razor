@@ -1,6 +1,5 @@
 ﻿@page "/"
 @using MudBlazor
-@using MudBlazorExample.Models
 @using MudBlazorExample.Services
 @inject IAppRoleService AppRoleService;
 
@@ -27,7 +26,13 @@
     <ToolBarContent>
         <MudText Typo="Typo.h6">Rolleoversikt</MudText>
         <MudSpacer />
-        <MudTextField @bind-Value="searchString" Immediate="true" DebounceInterval="100" Placeholder="Søk" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"></MudTextField>
+        <MudTextField 
+            @bind-Value="searchString" 
+            Immediate="true" 
+            DebounceInterval="100"
+            Placeholder="Søk"
+            Adornment="Adornment.Start"
+            AdornmentIcon="@Icons.Material.Filled.Search"/>
     </ToolBarContent>
     <ColGroup>
         <col style="width: 60px;"/>
@@ -68,15 +73,17 @@
     
     private bool FilterTrigger(AppRoleVM app) => FilterApps(app, searchString);
     
-    private bool FilterApps(AppRoleVM app, string searchString)
+    private bool FilterApps(AppRoleVM appRole, string searchString)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-        if (app.DisplayName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
+        if (appRole.DisplayName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
             return true;
-        if (app.Description?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
+        if (appRole.Description?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
             return true;
-        if (app.Value?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
+        if (appRole.Value?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
+            return true;
+        if (appRole.App?.DisplayName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
             return true;
         return false;
     }
